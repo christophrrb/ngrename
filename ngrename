@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Example
+# ngrename original-selector-name-without-app new-selector-name-without-app OriginalClassName NewClassName
+
+# Another Example
+# ngrename old-component new-component OldComponent NewComponent
+
+text1=$1
+# Exports grep result to file with file names of the existing selector
+grep "$text1" -lr --exclude-dir="node_modules" > grepfiles.txt;
+input="grepfiles.txt"
+
+# Change to the new selector name
+while read -r line
+do
+	sed -i -e "s/$1/$2/g" "${line}"
+done < "$input"
+
+text2=$3
+# Exports grep result to file with file names of the existing selector
+grep "$text2" -lr --exclude-dir="node_modules" > grepfiles2.txt;
+
+# Change to the new class name
+while read -r line
+do
+        sed -i -e "s/$3/$4/g" "${line}"
+done < "$input"
+
+# Change the names of the files themselves
+# Do one pass for the folders
+for f in $(find src -name '*')
+do
+	echo "$f"
+	mv "$f" "$(echo "$f" | sed s/$1/$2/g)"
+done
+
+# Then the second pass so that the files can get moved to the folders
+# This was done because it seems like the files get chosen first with *, so their paths would have the new folder name
+# but that folder itself wouldn't have been renamed yet, so mv couldn't carry out the command
+for f in $(find src -name '*.*')
+do
+	echo "$f"
+	mv "$f" "$(echo "$f" | sed s/$1/$2/g)"
+done
+
+# Good to clean up after yourself :)
+rm grepfiles.txt
