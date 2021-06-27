@@ -1,2 +1,2 @@
 # ngrename
-Script to rename Angular components
+bash Script to Rename Angular Components
